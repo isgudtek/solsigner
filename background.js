@@ -85,12 +85,18 @@ chrome.runtime.onMessageExternal.addListener((request, sender, sendResponse) => 
 
             if (isValid) {
                 const now = Date.now();
+                // Create a truncated proof token for visual verification
+                const proofToken = signature.substring(0, 8) + '...' + signature.substring(signature.length - 8);
+
                 // Identity (Address) stays in local, 
-                // but the Proof (lastVerified) goes into Session (Memory-only)
+                // but the Proof (lastVerified + token) goes into Session (Memory-only)
                 chrome.storage.local.set({ pairedAddress: address }, () => {
-                    chrome.storage.session.set({ lastVerified: now }, () => {
+                    chrome.storage.session.set({
+                        lastVerified: now,
+                        lastProof: proofToken
+                    }, () => {
                         console.log('Solsigner: Verified and locked to memory-only session.');
-                        sendResponse({ success: true, timestamp: now });
+                        sendResponse({ success: true, timestamp: now, proofToken });
                     });
                 });
             } else {

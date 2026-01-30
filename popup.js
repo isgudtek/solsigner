@@ -10,21 +10,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const updateUI = () => {
         // Read Identity from Local and Proof from Session
         chrome.storage.local.get(['pairedAddress'], (local) => {
-            chrome.storage.session.get(['lastVerified'], (session) => {
+            chrome.storage.session.get(['lastVerified', 'lastProof'], (session) => {
                 if (local.pairedAddress) {
                     notPairedView.classList.add('hidden');
                     pairedView.classList.remove('hidden');
                     addressDisplay.textContent = local.pairedAddress;
 
                     const statusEl = document.getElementById('verifyStatus');
+                    const proofEl = document.getElementById('proofToken');
+
                     if (session.lastVerified) {
                         const date = new Date(session.lastVerified);
                         const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                         statusEl.textContent = `✓ Verified at ${timeStr}`;
                         statusEl.style.color = 'var(--primary)';
+
+                        if (session.lastProof) {
+                            proofEl.textContent = `Proof Token: ${session.lastProof}`;
+                            proofEl.style.display = 'block';
+                        }
                     } else {
                         statusEl.textContent = `⚠ Session Expired - Verification Required`;
                         statusEl.style.color = '#f59e0b'; // Amber
+                        proofEl.style.display = 'none';
                     }
                 } else {
                     notPairedView.classList.remove('hidden');
