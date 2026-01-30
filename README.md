@@ -39,3 +39,23 @@ Solsigner generates a random nonce in the background service worker. This nonce 
 
 -   [TweetNaCl.js](https://github.com/dchest/tweetnacl-js) - For Ed25519 signature verification.
 -   Custom Base58 Decoder - For handling Solana addresses.
+
+## Security Philosophy
+
+### Solsigner vs. Custodial Wallets
+
+Solsigner is designed to be **operationally safer** than a standard wallet by separating **Identity** from **Asset Control**.
+
+| Feature | Asset Wallets (e.g. Phantom) | Solsigner |
+| :--- | :--- | :--- |
+| **Primary Goal** | Asset Custody & Transactions | Identity Proof & Ownership Verification |
+| **Key Exposure** | Stores encrypted Private Keys on disk | **Zero Key Exposure**. Never touches private keys. |
+| **Persistence** | Permanent disk-based storage | **Session-Locked**. Proofs are kept in RAM only. |
+| **Portability** | Syncable/Exportable profiles | **Non-Exportable**. Bound to local machine session. |
+
+### The "Double-Lock" Architecture
+
+1.  **Identity (Local)**: The wallet's public address is stored in `chrome.storage.local`. This is persistent across browser restarts, allowing the extension to remember *which* wallet you paired.
+2.  **Verification (Session)**: The cryptographic signature (the "Proof of Life") is stored in `chrome.storage.session`. This storage is memory-only and never touches the hard drive. 
+
+Even if a malicious actor copies your entire browser profile files, they cannot export the "Verified" status. It is physically bound to your current computer session. When the browser is closed, the proof wipes, requiring a fresh signature from your physical wallet on next use.
