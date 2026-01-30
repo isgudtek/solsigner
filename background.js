@@ -85,12 +85,13 @@ chrome.runtime.onMessageExternal.addListener((request, sender, sendResponse) => 
 
             if (isValid) {
                 const now = Date.now();
-                chrome.storage.local.set({
-                    pairedAddress: address,
-                    lastVerified: now
-                }, () => {
-                    console.log('Solsigner: Verified and saved', address);
-                    sendResponse({ success: true, timestamp: now });
+                // Identity (Address) stays in local, 
+                // but the Proof (lastVerified) goes into Session (Memory-only)
+                chrome.storage.local.set({ pairedAddress: address }, () => {
+                    chrome.storage.session.set({ lastVerified: now }, () => {
+                        console.log('Solsigner: Verified and locked to memory-only session.');
+                        sendResponse({ success: true, timestamp: now });
+                    });
                 });
             } else {
                 sendResponse({ success: false, error: 'Cryptographic signature mismatch.' });

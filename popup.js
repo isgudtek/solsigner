@@ -8,21 +8,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Update UI based on pairing status
     const updateUI = () => {
-        chrome.storage.local.get(['pairedAddress', 'lastVerified'], (result) => {
-            if (result.pairedAddress) {
-                notPairedView.classList.add('hidden');
-                pairedView.classList.remove('hidden');
-                addressDisplay.textContent = result.pairedAddress;
+        // Read Identity from Local and Proof from Session
+        chrome.storage.local.get(['pairedAddress'], (local) => {
+            chrome.storage.session.get(['lastVerified'], (session) => {
+                if (local.pairedAddress) {
+                    notPairedView.classList.add('hidden');
+                    pairedView.classList.remove('hidden');
+                    addressDisplay.textContent = local.pairedAddress;
 
-                if (result.lastVerified) {
-                    const date = new Date(result.lastVerified);
-                    const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                    document.getElementById('verifyStatus').textContent = `✓ Verified at ${timeStr}`;
+                    const statusEl = document.getElementById('verifyStatus');
+                    if (session.lastVerified) {
+                        const date = new Date(session.lastVerified);
+                        const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                        statusEl.textContent = `✓ Verified at ${timeStr}`;
+                        statusEl.style.color = 'var(--primary)';
+                    } else {
+                        statusEl.textContent = `⚠ Session Expired - Verification Required`;
+                        statusEl.style.color = '#f59e0b'; // Amber
+                    }
+                } else {
+                    notPairedView.classList.remove('hidden');
+                    pairedView.classList.add('hidden');
                 }
-            } else {
-                notPairedView.classList.remove('hidden');
-                pairedView.classList.add('hidden');
-            }
+            });
         });
     };
 
