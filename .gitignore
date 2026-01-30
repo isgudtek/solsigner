@@ -1,0 +1,10 @@
+# Standard Gitignore for Chrome Extensions
+node_modules/
+.DS_Store
+*.log
+.gemini/
+brain/
+implementation_plan.md
+walkthrough.md
+task.md
+.git/

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solsigner Settings</title>
+    <style>
+        :root {
+            --primary: #10b981;
+            --primary-dark: #059669;
+            --bg: #0f172a;
+            --sidebar-bg: #1e293b;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background-color: var(--bg);
+            background-image: radial-gradient(rgba(255, 255, 255, 0.05) 0.5px, transparent 0.5px);
+            background-size: 20px 20px;
+            color: var(--text-main);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            display: flex;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: var(--sidebar-bg);
+            padding: 40px 24px;
+            border-right: 1px solid var(--border);
+            box-shadow: 4px 0 10px rgba(0, 0, 0, 0.02);
+            flex-shrink: 0;
+        }
+
+        .main {
+            flex: 1;
+            padding: 60px 80px;
+            max-width: 900px;
+            overflow-y: auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 48px;
+            padding-left: 4px;
+        }
+
+        .logo svg {
+            fill: var(--primary);
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 32px;
+            letter-spacing: -0.02em;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 32px;
+            border: 1px solid var(--border);
+        }
+
+        .card h2 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-top: 0;
+            margin-bottom: 16px;
+        }
+
+        .nav-item {
+            padding: 14px 16px;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover {
+            background: #334155;
+            color: #fff;
+        }
+
+        .nav-item.active {
+            background: #0f172a;
+            color: var(--primary);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 10px;
+            border: none;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .status-pill {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 40px;
+            font-size: 11px;
+            font-weight: 800;
+            margin-left: 10px;
+            text-transform: uppercase;
+        }
+
+        .status-pill.paired {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .status-pill.unpaired {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .address-box {
+            background: #0f172a;
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            font-family: monospace;
+            font-size: 14px;
+            color: var(--primary);
+            margin-bottom: 24px;
+            word-break: break-all;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar">
+        <div class="logo">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+            Solsigner
+        </div>
+        <div class="nav-item active" data-section="wallet">Wallet Pairing</div>
+        <div class="nav-item" data-section="settings">General Settings</div>
+        <div class="nav-item" data-section="support">Support</div>
+    </div>
+
+    <div class="main">
+        <!-- Wallet Section -->
+        <div id="section-wallet" class="content-section">
+            <h1>Wallet Management</h1>
+            <div class="card">
+                <h2>Current Status <span id="pairingStatus" class="status-pill unpaired">Not Paired</span></h2>
+                <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 24px;">Manage your connected Phantom
+                    wallet and verify ownership status.</p>
+
+                <div id="pairedControls" class="hidden">
+                    <div id="walletAddress" class="address-box">No address connected</div>
+                    <button id="unpairWalletBtn" class="btn btn-primary" style="background: #ef4444;">Disconnect
+                        Wallet</button>
+                </div>
+
+                <div id="unpairedControls">
+                    <button id="pairWalletBtn" class="btn btn-primary">Pair Phantom Wallet</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Section -->
+        <div id="section-settings" class="content-section hidden">
+            <h1>General Settings</h1>
+            <div class="card">
+                <h2>Coming Soon</h2>
+                <p style="color: var(--text-muted);">Additional security settings and notification preferences will be
+                    available here.</p>
+            </div>
+        </div>
+
+        <!-- Support Section -->
+        <div id="section-support" class="content-section hidden">
+            <h1>Support</h1>
+            <div class="card">
+                <h2>Help & Documentation</h2>
+                <p style="color: var(--text-muted); margin-bottom: 20px;">Need help with Solsigner? Contact our support
+                    team or check the documentation.</p>
+                <button class="btn btn-secondary">Contact Support</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="options.js"></script>
+</body>
+
+</html>
