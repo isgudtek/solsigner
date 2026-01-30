@@ -29,28 +29,38 @@ document.addEventListener('DOMContentLoaded', () => {
     const unpairWalletBtn = document.getElementById('unpairWalletBtn');
 
     const updateUI = () => {
-        chrome.runtime.sendMessage({ type: 'GET_PAIRING_STATUS' }, (response) => {
-            if (response && response.pairedAddress) {
-                pairingStatus.textContent = 'Paired';
-                pairingStatus.className = 'status-pill paired';
-                walletAddress.textContent = response.pairedAddress;
-                pairedControls.classList.remove('hidden');
-                unpairedControls.classList.add('hidden');
-            } else {
-                pairingStatus.textContent = 'Not Paired';
-                pairingStatus.className = 'status-pill unpaired';
-                pairedControls.classList.add('hidden');
-                unpairedControls.classList.remove('hidden');
-            }
+        chrome.storage.local.get(['pairedAddress'], (local) => {
+            chrome.storage.session.get(['lastVerified'], (session) => {
+                if (local.pairedAddress) {
+                    pairingStatus.textContent = session.lastVerified ? 'Verified' : 'Identity Paired';
+                    pairingStatus.className = session.lastVerified ? 'status-pill paired' : 'status-pill unpaired';
+                    walletAddress.textContent = local.pairedAddress;
+                    pairedControls.classList.remove('hidden');
+                    unpairedControls.classList.add('hidden');
+
+                    if (!session.lastVerified) {
+                        walletAddress.style.color = '#f59e0b'; // Warn if session expired
+                    } else {
+                        walletAddress.style.color = '';
+                    }
+                } else {
+                    pairingStatus.textContent = 'Not Paired';
+                    pairingStatus.className = 'status-pill unpaired';
+                    pairedControls.classList.add('hidden');
+                    unpairedControls.classList.remove('hidden');
+                }
+            });
         });
     };
 
     updateUI();
 
-    pairWalletBtn.addEventListener('click', () => {
-        const bridgeUrl = `https://gudtek.lol/solsigner/pair.php?extId=${chrome.runtime.id}`;
+    const openBridge = (mode = 'pair') => {
+        const bridgeUrl = `https://gudtek.lol/solsigner/pair.php?extId=${chrome.runtime.id}&mode=${mode}`;
         chrome.tabs.create({ url: bridgeUrl });
-    });
+    };
+
+    pairWalletBtn.addEventListener('click', () => openBridge('pair'));
 
     unpairWalletBtn.addEventListener('click', () => {
         if (confirm('Are you sure you want to disconnect this wallet?')) {
@@ -63,9 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Listen for storage changes to update UI in real-time
-    chrome.storage.onChanged.addListener((changes, area) => {
-        if (area === 'local' && changes.pairedAddress) {
-            updateUI();
-        }
+    chrome.storage.onChanged.addListener(() => {
+        updateUI();
     });
 });
