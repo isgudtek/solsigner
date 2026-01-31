@@ -135,13 +135,11 @@ $extId = $_GET['extId'] ?? '';
 
     <script>
         // Automatic extraction of Extension ID if not passed via PHP
-        let extId = "<?php echo $extId; ?>";
+        // Fallback to the user's provided ID for seamless testing
+        let extId = "<?php echo $extId; ?>" || "abdnnikclmnffenfimeneponffdcjbpj";
         
-        // If still empty, try to get from the extension itself via a Custom Event or check common dev IDs
         if (!extId) {
             console.log("No extId in URL, checking environment...");
-            // Optionally: use a hardcoded fallback for your specific dev extension during testing
-            // extId = "YOUR_DEV_ID"; 
         }
 
         const verifyBtn = document.getElementById('verifyBtn');
